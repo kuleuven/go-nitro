@@ -683,7 +683,12 @@ func (c *NitroClient) FindBoundResource(resourceType string, resourceName string
 
 //FindAllBoundResources returns an array of bound config objects of the type specified that are bound to the resource specified
 func (c *NitroClient) FindAllBoundResources(resourceType string, resourceName string, boundResourceType string) ([]map[string]interface{}, error) {
-	result, err := c.listBoundResources(resourceName, resourceType, boundResourceType, "", "")
+	return c.FindAllBoundFilteredResources(resourceType, resourceName, boundResourceType, "", "")
+}
+
+//FindAllBoundResources returns an array of bound config objects of the type specified that are bound to the resource specified
+func (c *NitroClient) FindAllBoundFilteredResources(resourceType string, resourceName string, boundResourceType string, boundResourceFilterName string, boundResourceFilterValue string) ([]map[string]interface{}, error) {
+	result, err := c.listBoundResources(resourceName, resourceType, boundResourceType, boundResourceFilterName, boundResourceFilterValue)
 	if err != nil {
 		log.Printf("[INFO] go-nitro: FindAllBoundResources: No %s %s to %s  binding found", resourceType, resourceName, boundResourceType)
 		return nil, fmt.Errorf("[ERROR] go-nitro: No %s %s to %s binding found, err=%s", resourceType, resourceName, boundResourceType, err)

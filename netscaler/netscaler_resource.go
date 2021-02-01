@@ -305,11 +305,21 @@ func (c *NitroClient) unbindResource(resourceType string, resourceName string, b
 
 func (c *NitroClient) listBoundResources(resourceName string, resourceType string, boundResourceType string, boundResourceFilterName string, boundResourceFilterValue string) ([]byte, error) {
 	log.Println("[DEBUG] go-nitro: listing bound resources of type ", resourceType, ": ", resourceName)
-	var url string
-	if boundResourceFilterName == "" {
-		url = c.url + fmt.Sprintf("%s_%s_binding/%s", resourceType, boundResourceType, resourceName)
-	} else {
-		url = c.url + fmt.Sprintf("%s_%s_binding/%s?filter=%s:%s", resourceType, boundResourceType, resourceName, boundResourceFilterName, boundResourceFilterValue)
+	url := c.url + fmt.Sprintf("%s_%s_binding", resourceType, boundResourceType)
+	if resourceName != "" {
+		url += fmt.Sprintf("/%s", resourceName)
+	}
+	if boundResourceFilterName != "" {
+		url += fmt.Sprintf("?filter=%s:%s", boundResourceFilterName, boundResourceFilterValue)
+	}
+	if resourceName == "" {
+		if boundResourceFilterName == "" {
+			url += "?"
+		} else {
+			url += "&"
+		}
+
+		url += "bulkbindings=yes"
 	}
 
 	return c.doHTTPRequest("GET", url, bytes.NewBuffer([]byte{}), readResponseHandler)
