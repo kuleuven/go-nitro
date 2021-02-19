@@ -1,9 +1,9 @@
 package netscaler
 
 import (
-	"log"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"log"
 )
 
 //FindStats returns the statistics of the supplied resource type if it exists. Use when the resource to be returned is an array
@@ -48,9 +48,17 @@ func (c *NitroClient) FindStat(resourceType string, resourceName string) (map[st
 		log.Printf("[WARN] go-nitro: FindStat No %s type with name %s found", resourceType, resourceName)
 		return nil, fmt.Errorf("[INFO] go-nitro: FindStat: No resource %s of type %s found", resourceName, resourceType)
 	}
-	resource := data[resourceType].([]interface{})[0] //only one resource obviously
-
-	return resource.(map[string]interface{}), nil
+	switch result := data[resourceType].(type) {
+	case map[string]interface{}:
+		//only one resource obviously
+		return result, nil
+	case []interface{}:
+		resource := result[0] //only first resource obviously
+		return resource.(map[string]interface{}), nil
+	default:
+		log.Printf("[WARN] go-nitro: FindStat Unable to determine type of response")
+		return nil, fmt.Errorf("[INFO] go-nitro: FindStat: Unable to determine type of response")
+	}
 }
 
 func (c *NitroClient) FindStatWithArgs(resourceType string, resourceName string, args []string) (map[string]interface{}, error) {
